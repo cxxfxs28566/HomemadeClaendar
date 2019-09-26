@@ -1,15 +1,15 @@
 <resources>
     <string name="app_name">HomemadeClaendar</string>
-    <string name="_0AM">0:00</string>
-    <string name="_1AM">1:00</string>
-    <string name="_2AM">2:00</string>
-    <string name="_3AM">3:00</string>
-    <string name="_4AM">4:00</string>
-    <string name="_5AM">5:00</string>
-    <string name="_6AM">6:00</string>
-    <string name="_7AM">7:00</string>
-    <string name="_8AM">8:00</string>
-    <string name="_9AM">9:00</string>
+    <string name="_0AM">00:00</string>
+    <string name="_1AM">01:00</string>
+    <string name="_2AM">02:00</string>
+    <string name="_3AM">03:00</string>
+    <string name="_4AM">04:00</string>
+    <string name="_5AM">05:00</string>
+    <string name="_6AM">06:00</string>
+    <string name="_7AM">07:00</string>
+    <string name="_8AM">08:00</string>
+    <string name="_9AM">09:00</string>
     <string name="_10AM">10:00</string>
     <string name="_11AM">11:00</string>
     <string name="_12PM">12:00</string>
@@ -37,4 +37,8 @@
     <string name="add_event">Add Event</string>
     <string name="delete">Delete</string>
     <string name="update">Update</string>
+    <string name="title_home">Home</string>
+    <string name="title_calendar">Calendar</string>
+    <string name="title_agenda">Agenda</string>
+    <string name="title_setting">Setting</string>
 </resources>

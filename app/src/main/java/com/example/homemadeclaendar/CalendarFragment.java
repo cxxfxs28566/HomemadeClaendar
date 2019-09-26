@@ -1,25 +1,22 @@
 package com.example.homemadeclaendar;
 
 import android.app.AlarmManager;
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.arch.persistence.room.Room;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -28,6 +25,7 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -35,9 +33,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-
-
-public class MainActivity extends AppCompatActivity {
+public class CalendarFragment extends Fragment {
+    private View vCalendar;
     public final Pattern TIME_24HOURS_PATTERN = Pattern.compile(
             "^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
     );
@@ -69,32 +66,23 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton nextDay;
     private Spinner spEventType;
     private Spinner spEventTypeDetail;
-    //
-    private NotificationManagerCompat notificationManagerCompat;
-    //
-
-
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        //
-//        notificationManagerCompat = NotificationManagerCompat.from(this);
-        //
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main); // get the reference of Toolbar
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        mLayout = (RelativeLayout)findViewById(R.id.layout_main);
-        currentDate = (TextView)findViewById(R.id.tv_current_date);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        vCalendar = inflater.inflate(R.layout.fragment_calendar, container, false);
+        Toolbar toolbar = (Toolbar) vCalendar.findViewById(R.id.toolbar_main); // get the reference of Toolbar
+//        vCalendar.setSupportActionBar(toolbar);
+//        vCalendar.getSupportActionBar().setDisplayShowTitleEnabled(false);
+        mLayout = (RelativeLayout)vCalendar.findViewById(R.id.layout_main);
+        currentDate = (TextView)vCalendar.findViewById(R.id.tv_current_date);
         currentDate.setText(displayDateInString(cal.getTime()));
         //Connect to event database
-        eventDB  = Room.databaseBuilder(this.getApplicationContext(), EventDatabase.class, "EventDatabase").fallbackToDestructiveMigration().build();
+        eventDB  = Room.databaseBuilder(vCalendar.getContext(), EventDatabase.class, "EventDatabase").fallbackToDestructiveMigration().build();
 
         displayDailyEvents();
 
-        previousDay = (ImageButton)findViewById(R.id.btn_previous_day);
-        nextDay = (ImageButton)findViewById(R.id.btn_next_day);
+        previousDay = (ImageButton)vCalendar.findViewById(R.id.btn_previous_day);
+        nextDay = (ImageButton)vCalendar.findViewById(R.id.btn_next_day);
         previousDay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -108,28 +96,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //read dailyevents
+        ImageButton addEvent = (ImageButton)vCalendar.findViewById(R.id.btn_add);
 
-
-        //delete all events from database, just for test
-//        final Button deleteAll = (Button)findViewById(R.id.btn_deleteAll);
-//        deleteAll.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                DeleteAllEventsFromDatabase deleteAllEvents = new DeleteAllEventsFromDatabase();
-//                deleteAllEvents.execute();
-//
-//            }
-//        });
-
-
-        ImageButton addEvent = (ImageButton)findViewById(R.id.btn_add);
-
-        //create event dialog by press "add" button
         addEvent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(vCalendar.getContext());
                 alertDialogBuilder.setCancelable(false);
                 initEventViewControls();
                 alertDialogBuilder.setView(eventInputDialogView);
@@ -143,16 +115,16 @@ public class MainActivity extends AppCompatActivity {
 
                         //Get user input from event dialog
                         try{
-                        String iName = tiName.getEditText().getText().toString().trim();
-                        String iLocation = tiLocation.getEditText().getText().toString().trim();
-                        String iStartTime = tiStartTime.getEditText().getText().toString();
-                        String iEndTime = tiEndTime.getEditText().getText().toString();
-                        String iDescription = tiDescription.getEditText().getText().toString();
-                        String iType= tiEventType.getEditText().getText().toString();
+                            String iName = tiName.getEditText().getText().toString().trim();
+                            String iLocation = tiLocation.getEditText().getText().toString().trim();
+                            String iStartTime = tiStartTime.getEditText().getText().toString();
+                            String iEndTime = tiEndTime.getEditText().getText().toString();
+                            String iDescription = tiDescription.getEditText().getText().toString();
+                            String iType= tiEventType.getEditText().getText().toString();
                             //event validation check
                             if (eventTimeCheck() & eventNameCheck()){
                                 //Insert event to event database and  create view based on the event time frames and duration
-                                InsertEventToDatabase insertEvent = new InsertEventToDatabase();
+                                CalendarFragment.InsertEventToDatabase insertEvent = new CalendarFragment.InsertEventToDatabase();
                                 insertEvent.execute(iStartTime,iEndTime,iName,iLocation,iDescription,iType);
 
                                 //create event view
@@ -171,118 +143,13 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
-    }
-    //
-    public void sendOnChannel1(String start, String end,String name,String location,int id){
-        String[] nHourMinutes = start.split(":");
-        int nHour = Integer.valueOf(nHourMinutes[0]);
-        int nMinutes = Integer.valueOf(nHourMinutes[1]);
-        Calendar calendar = (Calendar)cal.clone();
-        calendar.set(Calendar.HOUR_OF_DAY, nHour);
-        calendar.set(Calendar.MINUTE,nMinutes);
-        calendar.set(Calendar.SECOND,0);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this,NotificationPublish.class);
-        intent.putExtra("Start",start);
-        intent.putExtra("End",end);
-        intent.putExtra("Name",name);
-        intent.putExtra("Location",location);
-        intent.putExtra("Id",id);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this,id,intent,0);
-        if(calendar.getTimeInMillis()>= System.currentTimeMillis()){
-        alarmManager.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),pendingIntent);
-        }
-    }
-    //
-
-    //create and display event view
-    private void createEventView(String startTime, String endTime, String name, String location, final int rowId,String type ){
-        //display event name ,location and time
-        String info = name +"\n" + startTime + "-" + endTime +"\n"+ location;
-        String color =SetEventViewColor(type);
-        //get event view size and position factors based on event time
-        float sTime = getUnifyEventTime(startTime);
-        float eTime = getUnifyEventTime(endTime);
-        float duration = eTime - sTime;
-        int topMargin = Math.round(15+50*sTime);//convert float to int
-        int height = Math.round(50*duration);//convert float to int
-
-        final TextView mEventView = new TextView(MainActivity.this);
-        RelativeLayout.LayoutParams lParam = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        lParam.addRule(RelativeLayout.BELOW,R.id.toolbar_main);
-        lParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-        lParam.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, topMargin, getResources().getDisplayMetrics());//convert dp to px
-        lParam.rightMargin = 0;
-        lParam.leftMargin = 30;
-        lParam.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, height, getResources().getDisplayMetrics());//convert dp to px
-        mEventView.setLayoutParams(lParam);
-        mEventView.setPadding(24, 0, 24, 0);
-        //Get the width of View line
-        View v = findViewById(R.id.v_0am);
-        //set width of event view equal to the width of view line
-        mEventView.setWidth(v.getWidth());
-        mEventView.setGravity(0x11);
-        mEventView.setTextColor(Color.parseColor("#000000"));
-        mEventView.setBackgroundColor(Color.parseColor(color));
-        mEventView.setText(info);
-        mEventView.setId(rowId);
-        mEventView.setTag("ViewOfDay");
-        mEventView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final int eventViewId = v.getId();
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                alertDialogBuilder.setCancelable(false);
-                initEventDetailControls();
-                alertDialogBuilder.setView(eventDetailDialogView);
-                final AlertDialog eventDetailDialog = alertDialogBuilder.create();
-                eventDetailDialog.setTitle("Event Detail");
-                eventDetailDialog.show();
-                DisplayEventDetail displayEventDetail = new DisplayEventDetail();
-                displayEventDetail.execute(eventViewId);
-
-                deleteEventDetailButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        DeleteEventById deleteEventById = new DeleteEventById();
-                        deleteEventById.execute(eventViewId);
-                        eventDetailDialog.cancel();
-                        Toast.makeText(MainActivity.this, "An event has been deleted", Toast.LENGTH_LONG).show();
-                    }
-                });
-                backEventDetailButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        eventDetailDialog.cancel();
-                    }
-                });
-                updateEventDetailButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        String sTimeDetail = tiStartTimeDetail.getEditText().getText().toString();
-                        String eTimeDetail = tiEndTimeDetail.getEditText().getText().toString();
-                        String eNameDetail = tiNameDetail.getEditText().getText().toString();
-                        String eLocationDetail = tiLocationDetail.getEditText().getText().toString();
-                        String rowid = String.valueOf(eventViewId);
-                        String eTypeDetail = tiEventTypeDetail.getEditText().getText().toString();
-                        if(eventTimeDetailCheck() & eventNameDetailCheck()){
-                        UpdateEventById updateEventById = new UpdateEventById();
-                        updateEventById.execute(sTimeDetail,eTimeDetail,eNameDetail,eLocationDetail,rowid,eTypeDetail);
-                        eventDetailDialog.cancel();
-                        }
-                        }
-                });
-            }
-        });
-        final int childCount = mLayout.getChildCount();
-        mLayout.addView(mEventView,childCount-1);
-        Log.i("ViewOfDay", "The index is " + (childCount-1)+" The rowId is " + rowId);
+        return vCalendar;
     }
     //Initial event view
     private void initEventViewControls()
     {
         // Get layout inflater object.
-        LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
+        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
 
         // Inflate the event dialog from a layout xml file.
         eventInputDialogView = layoutInflater.inflate(R.layout.add_event_dialog, null);
@@ -291,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
         tiEventType = (TextInputLayout) eventInputDialogView.findViewById(R.id.til_eventType);
         spEventType = (Spinner) eventInputDialogView.findViewById(R.id.sp_eventType);
         String[] type = {"Other","Study", "Work", "Leisure", "Sport", "Go Out"};
-        ArrayAdapter<String> spinnerAdp = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, type);
+        ArrayAdapter<String> spinnerAdp = new ArrayAdapter<String>(vCalendar.getContext(), android.R.layout.simple_spinner_item, type);
         spinnerAdp.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spEventType.setAdapter(spinnerAdp);
         spEventType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -320,19 +187,40 @@ public class MainActivity extends AppCompatActivity {
         saveEventDataButton = eventInputDialogView.findViewById(R.id.btn_save_event);
         backEventDataButton = eventInputDialogView.findViewById(R.id.btn_back_event);
     }
-
+    //Set notification on certain channel
+    public void sendOnChannel1(String start, String end,String name,String location,int id){
+        String[] nHourMinutes = start.split(":");
+        int nHour = Integer.valueOf(nHourMinutes[0]);
+        int nMinutes = Integer.valueOf(nHourMinutes[1]);
+        Calendar calendar = (Calendar)cal.clone();
+        calendar.set(Calendar.HOUR_OF_DAY, nHour);
+        calendar.set(Calendar.MINUTE,nMinutes);
+        calendar.set(Calendar.SECOND,0);
+        AlarmManager alarmManager = (AlarmManager) vCalendar.getContext().getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(vCalendar.getContext(),NotificationPublish.class);
+        intent.putExtra("Start",start);
+        intent.putExtra("End",end);
+        intent.putExtra("Name",name);
+        intent.putExtra("Location",location);
+        intent.putExtra("Id",id);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(vCalendar.getContext(),id,intent,0);
+        if(calendar.getTimeInMillis()>= System.currentTimeMillis()){
+            alarmManager.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),pendingIntent);
+        }
+    }
+    //
     //Initial event detail
     private void initEventDetailControls()
     {
         // Get layout inflater object.
-        LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
+        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         // Inflate the event dialog from a layout xml file.
         eventDetailDialogView = layoutInflater.inflate(R.layout.event_detail_dialog, null);
         // Get user input, edittext and button ui controls in the event dialog.
         tiEventTypeDetail  = (TextInputLayout) eventDetailDialogView.findViewById(R.id.til_eventTypeDetail);
         spEventTypeDetail = (Spinner) eventDetailDialogView.findViewById(R.id.sp_eventTypeDetail);
         String[] type = {"Other","Study", "Work", "Leisure", "Sport", "Go Out"};
-        ArrayAdapter<String> spinnerAdp = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, type);
+        ArrayAdapter<String> spinnerAdp = new ArrayAdapter<String>(vCalendar.getContext(), android.R.layout.simple_spinner_item, type);
         spinnerAdp.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spEventTypeDetail.setAdapter(spinnerAdp);
         spEventTypeDetail.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -370,6 +258,89 @@ public class MainActivity extends AppCompatActivity {
         float unifyTime = hours + minutes/60;
         return unifyTime;
     }
+    //create and display event view
+    private void createEventView(String startTime, String endTime, String name, String location, final int rowId,String type ){
+        //display event name ,location and time
+        String info = name +"\n" + startTime + "-" + endTime +"\n"+ location;
+        String color =SetEventViewColor(type);
+        //get event view size and position factors based on event time
+        float sTime = getUnifyEventTime(startTime);
+        float eTime = getUnifyEventTime(endTime);
+        float duration = eTime - sTime;
+        int topMargin = Math.round(15+50*sTime);//convert float to int
+        int height = Math.round(50*duration);//convert float to int
+
+        final TextView mEventView = new TextView(getContext());
+        RelativeLayout.LayoutParams lParam = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        lParam.addRule(RelativeLayout.BELOW,R.id.toolbar_main);
+        lParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        lParam.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, topMargin, getResources().getDisplayMetrics());//convert dp to px
+        lParam.rightMargin = 0;
+        lParam.leftMargin = 30;
+        lParam.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, height, getResources().getDisplayMetrics());//convert dp to px
+        mEventView.setLayoutParams(lParam);
+        mEventView.setPadding(24, 0, 24, 0);
+        //Get the width of View line
+        View v = vCalendar.findViewById(R.id.v_0am);
+        //set width of event view equal to the width of view line
+        mEventView.setWidth(v.getWidth());
+        mEventView.setGravity(0x11);
+        mEventView.setTextColor(Color.parseColor("#000000"));
+        mEventView.setBackgroundColor(Color.parseColor(color));
+        mEventView.setText(info);
+        mEventView.setId(rowId);
+        mEventView.setTag("ViewOfDay");
+        mEventView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final int eventViewId = v.getId();
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                alertDialogBuilder.setCancelable(false);
+                initEventDetailControls();
+                alertDialogBuilder.setView(eventDetailDialogView);
+                final AlertDialog eventDetailDialog = alertDialogBuilder.create();
+                eventDetailDialog.setTitle("Event Detail");
+                eventDetailDialog.show();
+                CalendarFragment.DisplayEventDetail displayEventDetail = new CalendarFragment.DisplayEventDetail();
+                displayEventDetail.execute(eventViewId);
+
+                deleteEventDetailButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        CalendarFragment.DeleteEventById deleteEventById = new CalendarFragment.DeleteEventById();
+                        deleteEventById.execute(eventViewId);
+                        eventDetailDialog.cancel();
+                        Toast.makeText(getContext(), "An event has been deleted", Toast.LENGTH_LONG).show();
+                    }
+                });
+                backEventDetailButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        eventDetailDialog.cancel();
+                    }
+                });
+                updateEventDetailButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String sTimeDetail = tiStartTimeDetail.getEditText().getText().toString();
+                        String eTimeDetail = tiEndTimeDetail.getEditText().getText().toString();
+                        String eNameDetail = tiNameDetail.getEditText().getText().toString();
+                        String eLocationDetail = tiLocationDetail.getEditText().getText().toString();
+                        String rowid = String.valueOf(eventViewId);
+                        String eTypeDetail = tiEventTypeDetail.getEditText().getText().toString();
+                        if(eventTimeDetailCheck() & eventNameDetailCheck()){
+                            CalendarFragment.UpdateEventById updateEventById = new CalendarFragment.UpdateEventById();
+                            updateEventById.execute(sTimeDetail,eTimeDetail,eNameDetail,eLocationDetail,rowid,eTypeDetail);
+                            eventDetailDialog.cancel();
+                        }
+                    }
+                });
+            }
+        });
+        final int childCount = mLayout.getChildCount();
+        mLayout.addView(mEventView,childCount-1);
+        Log.i("ViewOfDay", "The index is " + (childCount-1)+" The rowId is " + rowId);
+    }
     //Display event detail by id
     private class DisplayEventDetail extends AsyncTask<Integer,Void,Event> {
         @Override
@@ -380,17 +351,17 @@ public class MainActivity extends AppCompatActivity {
         }@Override
         protected void onPostExecute(Event event){
             if(event!=null){
-            try{
-                tiStartTimeDetail.getEditText().setText(event.getStartTime());
-                tiEndTimeDetail.getEditText().setText(event.getEndTime());
-                tiNameDetail.getEditText().setText(event.getEventName());
-                tiLocationDetail.getEditText().setText(event.getEventLocation());
-                tiDescriptionDetail.getEditText().setText(event.getEventDescription());
-                tiEventTypeDetail.getEditText().setText(event.getEventType());
-            }catch (Exception e){
-                e.printStackTrace();
+                try{
+                    tiStartTimeDetail.getEditText().setText(event.getStartTime());
+                    tiEndTimeDetail.getEditText().setText(event.getEndTime());
+                    tiNameDetail.getEditText().setText(event.getEventName());
+                    tiLocationDetail.getEditText().setText(event.getEventLocation());
+                    tiDescriptionDetail.getEditText().setText(event.getEventDescription());
+                    tiEventTypeDetail.getEditText().setText(event.getEventType());
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
-        }
         }
     }
     //Insert Event record to the database
@@ -437,16 +408,16 @@ public class MainActivity extends AppCompatActivity {
         }
         @Override
         protected void onPostExecute(Integer id){
-           try{
-           View v = findViewById(id);
-           mLayout.removeView(v);
+            try{
+                View v = vCalendar.findViewById(id);
+                mLayout.removeView(v);
             }catch (Exception e){
                 e.printStackTrace();
             }
-            AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-           Intent intent = new Intent(getApplicationContext(),NotificationPublish.class);
-           PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(),id,intent,0);
-           alarmManager.cancel(pendingIntent);
+            AlarmManager alarmManager = (AlarmManager)vCalendar.getContext().getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(vCalendar.getContext().getApplicationContext(),NotificationPublish.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(vCalendar.getContext().getApplicationContext(),id,intent,0);
+            alarmManager.cancel(pendingIntent);
         }
     }
     //Delete all event records
@@ -492,11 +463,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String[] detail) {
             if(!detail[4].equals("")){
-            View v = findViewById(Integer.valueOf(detail[4]));
-            mLayout.removeView(v);
-            createEventView(detail[0],detail[1],detail[2],detail[3],Integer.valueOf(detail[4]),detail[5]);
-            sendOnChannel1(detail[0],detail[1],detail[2],detail[3],Integer.valueOf(detail[4]));
-            Toast.makeText(MainActivity.this, "The event has benn updated", Toast.LENGTH_LONG).show();
+                View v = vCalendar.findViewById(Integer.valueOf(detail[4]));
+                mLayout.removeView(v);
+                createEventView(detail[0],detail[1],detail[2],detail[3],Integer.valueOf(detail[4]),detail[5]);
+//                sendOnChannel1(detail[0],detail[1],detail[2],detail[3],Integer.valueOf(detail[4]));
+                Toast.makeText(getContext(), "The event has benn updated", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -506,31 +477,31 @@ public class MainActivity extends AppCompatActivity {
     private class ReadDailyEvents extends AsyncTask<String, Void, List<Event>> {
         @Override
         protected List<Event> doInBackground(String... params) {
-                String thatDay = currentDate.getText().toString();
-                Date selectedDay = new Date();
-                //Pares currentDate(String) to Date
-                try {
-                    selectedDay = calFormat.parse(thatDay);
-                }catch (Exception e){
-                 e.printStackTrace();
-                }
-                //find event list by day
-                List<Event> events = eventDB.eventDao().findByDate(selectedDay);
+            String thatDay = currentDate.getText().toString();
+            Date selectedDay = new Date();
+            //Pares currentDate(String) to Date
+            try {
+                selectedDay = calFormat.parse(thatDay);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            //find event list by day
+            List<Event> events = eventDB.eventDao().findByDate(selectedDay);
             return events;
         }
-         @Override
+        @Override
         protected void onPostExecute(List<Event> events) {
             //create event view from event list
-             for(Event e:events){
-                 String start = e.getStartTime();
-                 String end = e.getEndTime();
-                 String name = e.getEventName();
-                 String location = e.getEventLocation();
-                 String description = e.getEventDescription();
-                 String type = e.getEventType();
-                 int eid = e.getEid();
-                 createEventView(start,end,name,location,eid,type);
-             }
+            for(Event e:events){
+                String start = e.getStartTime();
+                String end = e.getEndTime();
+                String name = e.getEventName();
+                String location = e.getEventLocation();
+                String description = e.getEventDescription();
+                String type = e.getEventType();
+                int eid = e.getEid();
+                createEventView(start,end,name,location,eid,type);
+            }
         }
     }
     //Set event view color
@@ -558,7 +529,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return color;
     }
-
     //check validation for event name creation view
     private  boolean eventNameCheck(){
         String eventName =  tiName.getEditText().getText().toString().trim();
@@ -574,15 +544,15 @@ public class MainActivity extends AppCompatActivity {
     //check validation for event name detail view
     private  boolean eventNameDetailCheck(){
         try {
-        String eventName =  tiNameDetail.getEditText().getText().toString().trim();
-        if (eventName.isEmpty()){
-            tiNameDetail.setError("Event name cannot be empty");
-            return false;
-        }else {
-            tiNameDetail.setError(null);
-            tiNameDetail.setErrorEnabled(false);
-            return true;
-        }
+            String eventName =  tiNameDetail.getEditText().getText().toString().trim();
+            if (eventName.isEmpty()){
+                tiNameDetail.setError("Event name cannot be empty");
+                return false;
+            }else {
+                tiNameDetail.setError(null);
+                tiNameDetail.setErrorEnabled(false);
+                return true;
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -606,33 +576,33 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         }else{
-                //Check if the time inout format is validate(HH:MM,except 24:00)
-                if (!TIME_24HOURS_PATTERN.matcher(eventStartTime).matches()||!TIME_24HOURS_PATTERN.matcher(eventEndTime).matches()){
-                    if(!TIME_24HOURS_PATTERN.matcher(eventStartTime).matches()){
-                        tiStartTime.setError("Please use correct time format: HH:MM");
-                    }
-                    if (!TIME_24HOURS_PATTERN.matcher(eventEndTime).matches()){
-                        tiEndTime.setError("Please use correct time format: HH:MM");
-                    }
-                    return false;
-                }else{
-                    //Get Hours and Minutes values separately
-                    String[] startHourMinutes = eventStartTime.split(":");
-                    int sHours = Integer.valueOf(startHourMinutes[0]);
-                    int sMinutes = Integer.valueOf(startHourMinutes[1]);
-                    String[] endHourMinutes = eventEndTime.split(":");
-                    int eHours = Integer.valueOf(endHourMinutes[0]);
-                    int eMinutes = Integer.valueOf(endHourMinutes[1]);
-
-                    //Check if end time is before the start time
-                    if(eHours < sHours || (eHours == sHours && eMinutes <= sMinutes)) {
-                        tiEndTime.setError("End time must be after the start time");
-                        return false;
-                    }
+            //Check if the time inout format is validate(HH:MM,except 24:00)
+            if (!TIME_24HOURS_PATTERN.matcher(eventStartTime).matches()||!TIME_24HOURS_PATTERN.matcher(eventEndTime).matches()){
+                if(!TIME_24HOURS_PATTERN.matcher(eventStartTime).matches()){
+                    tiStartTime.setError("Please use correct time format: HH:MM");
                 }
-                return true;
+                if (!TIME_24HOURS_PATTERN.matcher(eventEndTime).matches()){
+                    tiEndTime.setError("Please use correct time format: HH:MM");
+                }
+                return false;
+            }else{
+                //Get Hours and Minutes values separately
+                String[] startHourMinutes = eventStartTime.split(":");
+                int sHours = Integer.valueOf(startHourMinutes[0]);
+                int sMinutes = Integer.valueOf(startHourMinutes[1]);
+                String[] endHourMinutes = eventEndTime.split(":");
+                int eHours = Integer.valueOf(endHourMinutes[0]);
+                int eMinutes = Integer.valueOf(endHourMinutes[1]);
+
+                //Check if end time is before the start time
+                if(eHours < sHours || (eHours == sHours && eMinutes <= sMinutes)) {
+                    tiEndTime.setError("End time must be after the start time");
+                    return false;
+                }
             }
+            return true;
         }
+    }
 
     //check validation for event time detail view
     private  boolean eventTimeDetailCheck() {
@@ -678,14 +648,13 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
     }
-
     //Change current date when click "<",">" arrow
     private void previousCalendarDate(){
         //Find all existed daily event view and remove
         int childCount = mLayout.getChildCount();
         for(int i = childCount -1;i>=0;i--){
-             View child = mLayout.getChildAt(i);
-             Object tagObj = child.getTag();
+            View child = mLayout.getChildAt(i);
+            Object tagObj = child.getTag();
             if(tagObj != null && tagObj.equals("ViewOfDay")){
                 mLayout.removeView(child);
             }
@@ -700,8 +669,8 @@ public class MainActivity extends AppCompatActivity {
         //Find all existed daily event view and remove
         int childCount = mLayout.getChildCount();
         for(int i = childCount -1;i>=0;i--){
-             View child = mLayout.getChildAt(i);
-             Object tagObj = child.getTag();
+            View child = mLayout.getChildAt(i);
+            Object tagObj = child.getTag();
             if(tagObj != null && tagObj.equals("ViewOfDay")){
                 mLayout.removeView(child);
             }
@@ -716,11 +685,10 @@ public class MainActivity extends AppCompatActivity {
     private String displayDateInString(Date mDate){
         SimpleDateFormat calFormat = new SimpleDateFormat(" EEEE, MMM d, yyyy", Locale.ENGLISH);
         return calFormat.format(mDate);
-        }
+    }
     //display all-days events
     private void displayDailyEvents(){
-        ReadDailyEvents readDailyEvents = new ReadDailyEvents();
+        CalendarFragment.ReadDailyEvents readDailyEvents = new CalendarFragment.ReadDailyEvents();
         readDailyEvents.execute();
     }
 }
-

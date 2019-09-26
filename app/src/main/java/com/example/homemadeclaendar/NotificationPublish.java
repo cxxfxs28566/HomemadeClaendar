@@ -20,7 +20,7 @@ public class NotificationPublish extends BroadcastReceiver {
         int id = intent.getIntExtra("Id",0);
         NotificationManager manager2 = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.ic_event_notification)
+                .setSmallIcon(R.drawable.ic_iconmonstr_info_11)
                 .setContentTitle("New event: "+ name)
                 .setContentText("Next event at "+ start + "-" + end + " in "+location)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
