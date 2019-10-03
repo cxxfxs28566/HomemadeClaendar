@@ -272,14 +272,14 @@ public class CalendarFragment extends Fragment {
 
         final TextView mEventView = new TextView(getContext());
         RelativeLayout.LayoutParams lParam = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        lParam.addRule(RelativeLayout.BELOW,R.id.toolbar_main);
+//        lParam.addRule(RelativeLayout.BELOW,R.id.toolbar_main);
         lParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
         lParam.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, topMargin, getResources().getDisplayMetrics());//convert dp to px
-        lParam.rightMargin = 0;
-        lParam.leftMargin = 30;
+        lParam.rightMargin =(int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
+//        lParam.leftMargin = 30;
         lParam.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, height, getResources().getDisplayMetrics());//convert dp to px
         mEventView.setLayoutParams(lParam);
-        mEventView.setPadding(24, 0, 24, 0);
+        mEventView.setPadding(15, 0, 15, 0);
         //Get the width of View line
         View v = vCalendar.findViewById(R.id.v_0am);
         //set width of event view equal to the width of view line
