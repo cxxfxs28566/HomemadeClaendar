@@ -1,5 +1,7 @@
 package com.example.homemadeclaendar;
 
+import android.arch.persistence.room.Room;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -8,13 +10,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 public class MainNavigationActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener{
+    private EventDatabase eventDB = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_navigation);
-
-        //loadFragment(new CalendarFragment());
+        eventDB  = Room.databaseBuilder(this, EventDatabase.class, "EventDatabase").fallbackToDestructiveMigration().build();
+        loadFragment(new HomeFragment());
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(this);
@@ -25,7 +29,7 @@ public class MainNavigationActivity extends AppCompatActivity implements BottomN
         Fragment fragment = null;
         switch (item.getItemId()) {
             case R.id.navigation_home:
-                //fragment = new HomeFragment();
+                fragment = new HomeFragment();
                 break;
 
             case R.id.navigation_calendar:
@@ -34,6 +38,10 @@ public class MainNavigationActivity extends AppCompatActivity implements BottomN
 
             case R.id.navigation_agenda:
                 //fragment = new AgendaFragment();
+                break;
+            case R.id.navigation_setting:
+                DeleteAllEventsFromDatabase deleteAllEventsFromDatabase = new DeleteAllEventsFromDatabase();
+                deleteAllEventsFromDatabase.execute();
                 break;
         }
 
@@ -50,5 +58,17 @@ public class MainNavigationActivity extends AppCompatActivity implements BottomN
             return true;
         }
         return false;
+    }
+
+    private class DeleteAllEventsFromDatabase extends AsyncTask<Void,Void,String> {
+        @Override
+        protected String doInBackground(Void...params){
+            eventDB.eventDao().deleteAll();
+            return "";
+        }
+        @Override
+        protected void onPostExecute(String result){
+
+        }
     }
 }

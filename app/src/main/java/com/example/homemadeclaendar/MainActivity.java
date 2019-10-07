@@ -241,15 +241,15 @@ public class MainActivity extends AppCompatActivity {
                 DisplayEventDetail displayEventDetail = new DisplayEventDetail();
                 displayEventDetail.execute(eventViewId);
 
-                deleteEventDetailButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        DeleteEventById deleteEventById = new DeleteEventById();
-                        deleteEventById.execute(eventViewId);
-                        eventDetailDialog.cancel();
-                        Toast.makeText(MainActivity.this, "An event has been deleted", Toast.LENGTH_LONG).show();
-                    }
-                });
+//                deleteEventDetailButton.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        DeleteEventById deleteEventById = new DeleteEventById();
+//                        deleteEventById.execute(eventViewId);
+//                        eventDetailDialog.cancel();
+//                        Toast.makeText(MainActivity.this, "An event has been deleted", Toast.LENGTH_LONG).show();
+//                    }
+//                });
                 backEventDetailButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -359,7 +359,7 @@ public class MainActivity extends AppCompatActivity {
         tiDescriptionDetail = (TextInputLayout) eventDetailDialogView.findViewById(R.id.til_eventDescriptionDetail);
         updateEventDetailButton = eventDetailDialogView.findViewById(R.id.btn_update_eventDetail);
         backEventDetailButton = eventDetailDialogView.findViewById(R.id.btn_back_eventDetail);
-        deleteEventDetailButton = eventDetailDialogView.findViewById(R.id.btn_delete_eventDetail);
+//        deleteEventDetailButton = eventDetailDialogView.findViewById(R.id.btn_delete_eventDetail);
     }
 
     //Express time in decimals

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">HomemadeClaendar</string>
+    <string name="app_name">UniWalker</string>
     <string name="_0AM">00:00</string>
     <string name="_1AM">01:00</string>
     <string name="_2AM">02:00</string>
@@ -41,4 +41,11 @@
     <string name="title_calendar">Calendar</string>
     <string name="title_agenda">Agenda</string>
     <string name="title_setting">Setting</string>
+    <string name="detail_event_name">Event Name:</string>
+    <string name="event_date">EEEE, MM dd</string>
+    <string name="event_time">HH:MM - HH:MM</string>
+    <string name="event_location_tag">Location</string>
+    <string name="event_description_tag">Description</string>
+    <string name="event_detail_title">Event Detail</string>
+    <string name="current_time">HH:MM</string>
 </resources>
